@@ -17,5 +17,6 @@ fn main() {
     println!("The file data is\n{}", file_data);
     let mut parser = Parser::new(&file_data);
     parser.tokenize();
+    parser.print_tokens();
     return;
 }
