@@ -1,6 +1,4 @@
-use super::token::Token;
-
-
+use super::token::{Token, TokenType};
 macro_rules! is_whitespace {
     ($char:expr) => {
         matches!($char, ' ' | '\t' | '\n' | '\r')
@@ -15,7 +13,7 @@ macro_rules! is_alphanumeric {
 
 macro_rules! is_operator {
     ($char:expr) => {
-        matches!($char, '+' | '-' | '/' | '*')
+        matches!($char, '+' | '-' | '/' | '*' | ';')
     };
 }
 
@@ -46,6 +44,11 @@ impl Parser {
             let current_byte = self.get_current_value();
 
             match current_byte {
+
+                Some(byte) if *byte == ';' => {
+                    break
+                }
+
 
                 Some(byte) if is_alphanumeric!(byte) => {
                     let mut current_word = String::new();
@@ -81,6 +84,7 @@ impl Parser {
                         }
                     }
                     println!("The single number found is {}", current_word);
+                    self.add_token(Token::new(TokenType::TIntlit, Some(current_word.parse::<i64>().unwrap())));
                     continue;
                 }
 
@@ -89,6 +93,7 @@ impl Parser {
                     continue;
                 }
 
+               
                 Some(_) => {
                     self.consume(); // Consume unknown characters
                     continue;
@@ -110,12 +115,6 @@ impl Parser {
     fn get_current_value(&self) -> Option<&char> {
         self.file_data.get(self.current_index)
     }
-
-     // Get the value at current_index + 1
-    fn get_next_value(&self) -> Option<&char> {
-        self.file_data.get(self.current_index + 1)
-    }
-
     // Get the value at current_index + 1
     // Set current_index += 1
     fn consume(&mut self) -> Option<&char> {
@@ -142,19 +141,19 @@ impl Parser {
     fn handle_operator(&mut self, alpn_string: &str) {
         match alpn_string {
             "+" => {
-                let cur_token = Token::new(super::token::TokenType::TAdd, None);
+                let cur_token = Token::new(TokenType::TAdd, None);
                 self.add_token(cur_token);
             },
             "-" => {
-                let cur_token = Token::new(super::token::TokenType::TSub, None);
+                let cur_token = Token::new(TokenType::TSub, None);
                 self.add_token(cur_token);
             },
             "*" => {
-                let cur_token = Token::new(super::token::TokenType::TStar, None);
+                let cur_token = Token::new(TokenType::TStar, None);
                 self.add_token(cur_token);
             },
             "/" => {
-                let cur_token = Token::new(super::token::TokenType::TSlash, None);
+                let cur_token = Token::new(TokenType::TSlash, None);
                 self.add_token(cur_token);
             },
             _ => {}
