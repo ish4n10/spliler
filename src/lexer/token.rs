@@ -1,6 +1,6 @@
-use std::collections::btree_map::VacantEntry;
 
-#[derive(Debug)]
+
+#[derive(Copy, Clone, Debug)]
 pub enum TokenType {
     TAdd,
     TSub,
@@ -9,13 +9,7 @@ pub enum TokenType {
     TIntlit,
 }
 
-enum TokenValue {
-   CharArray(String),
-   Int(i64),
-   Float(f64)
-}
-
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Token {
     token: TokenType,
     value: i64,
@@ -27,5 +21,11 @@ impl Token {
             return Token{token, value: data};
         }
         return Token{token, value: 0};
+    }
+    pub fn get_token_type(&self) -> TokenType {
+        self.token
+    }
+    pub fn get_token_value(&self) -> i64 {
+        self.value
     }
 }

@@ -1,5 +1,8 @@
 use std::{fs::File, io::Read, path::Path};
 
+use crate::parser::ast::ASTNodeType;
+use crate::lexer::token::TokenType;
+
 pub fn read_input_file(file_path: &str) -> Result<String, String> {
     let file_name = file_path.replace("/", "");
     if file_name.is_empty() {
@@ -17,4 +20,16 @@ pub fn read_input_file(file_path: &str) -> Result<String, String> {
     file.read_to_end(&mut file_content).expect("you fucked up");
 
     return Ok(String::from_utf8_lossy(&file_content).into());
+}
+
+pub fn get_ast_by_token_type(token: TokenType) -> ASTNodeType {
+    match token {
+        TokenType::TAdd => ASTNodeType::AAdd,
+        TokenType::TSub => ASTNodeType::ASub,
+        TokenType::TStar => ASTNodeType::AMult,
+        TokenType::TSlash => ASTNodeType::ADivide,
+        TokenType::TIntlit => ASTNodeType::AIntLit,
+        _ => panic!("The token could not be found while matching ast instruction!")
+
+    }
 }

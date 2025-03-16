@@ -1,3 +1,2 @@
 pub mod token;
-pub mod parser;
-pub mod tree;
+pub mod lexical_analysis;

@@ -23,13 +23,13 @@ macro_rules! is_numeric {
     };
 }
 
-pub struct Parser {
+pub struct Lexer {
     file_data: Vec<char>,
     current_index: usize,
     token_list: Vec<Token>,
 }
 
-impl Parser {
+impl Lexer {
     pub fn new(file_input: &String) -> Self {
         Self {
             file_data: file_input.chars().collect(),
@@ -105,7 +105,7 @@ impl Parser {
     }
 }
 
-impl Parser {
+impl Lexer {
 
     fn add_token(&mut self, cur_token: Token) {
         self.token_list.push(cur_token);
@@ -137,7 +137,7 @@ impl Parser {
     }
 }
 
-impl Parser {
+impl Lexer {
     fn handle_operator(&mut self, alpn_string: &str) {
         match alpn_string {
             "+" => {
@@ -163,12 +163,16 @@ impl Parser {
 }
 
 
-impl Parser {
+impl Lexer {
+
     pub fn print_tokens(&self) {
         println!("The number of tokens is {}\n", self.token_list.len());
         for token in self.token_list.iter() {
             println!("{:?}\n", token);
         }
         return;
+    }
+    pub fn get_tokens(&self) -> &Vec<Token> {
+        return &self.token_list;
     }
 }
