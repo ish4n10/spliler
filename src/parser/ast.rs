@@ -1,3 +1,5 @@
+
+#[derive(Clone)]
 pub enum ASTNodeType {
     AAdd,
     ASub,
@@ -6,6 +8,7 @@ pub enum ASTNodeType {
     AIntLit
 }
 
+#[derive(Clone)]
 pub struct ASTNode {
     operation: ASTNodeType,
     left: Option<Box<ASTNode>>,

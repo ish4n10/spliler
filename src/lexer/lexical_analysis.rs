@@ -46,6 +46,7 @@ impl Lexer {
             match current_byte {
 
                 Some(byte) if *byte == ';' => {
+                    self.add_token(Token::new(TokenType::TSemiColon, 0));
                     break
                 }
 

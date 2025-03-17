@@ -1,12 +1,13 @@
 
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum TokenType {
     TAdd,
     TSub,
     TStar,
     TSlash,
     TIntlit,
+    TSemiColon
 }
 
 #[derive(Copy, Clone, Debug)]
