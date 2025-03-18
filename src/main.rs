@@ -3,6 +3,7 @@ mod lexer;
 mod parser;
 
 use helpers::read_input_file;
+use parser::parse::Parser;
 use std::env;
 
 fn main() {
@@ -13,7 +14,16 @@ fn main() {
         return;
     }
     let file_data = read_input_file(&args[1]).unwrap();
+    let mut lexer = lexer::lexical_analysis::Lexer::new(&file_data);
 
+    lexer.tokenize();
+
+    lexer.print_tokens();
+    let mut parser = Parser::new(lexer.get_tokens().to_vec());
+    let something = parser.generate_ast();
+    
+    println!("The node is\n{}", something.unwrap());
+    
     println!("The file data is\n{}", file_data);
     return;
 }

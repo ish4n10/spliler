@@ -1,4 +1,3 @@
-use std::thread::current;
 
 use crate::helpers::get_ast_by_token_type;
 use crate::lexer::token::Token;
@@ -13,7 +12,7 @@ pub struct Parser {
 }
 
 impl Parser {
-    fn new(token_list: Vec<Token>) -> Self {
+    pub fn new(token_list: Vec<Token>) -> Self {
         if token_list.is_empty() {
             panic!("Please specify token_list for parser");
         }
@@ -29,15 +28,35 @@ impl Parser {
 }
 
 impl Parser {
-    // fn generate_ast(&mut self) -> Option<Box<ASTNode>> {
-    //     self.assign_primary_node();
-    //     if self.current.1.get_token_type() == TokenType::TSlash {
-    //         return None;
-    //     }
-        
-    //     let left = self.parse_tree_root.as_ref().unwrap();
+    pub fn generate_ast(&mut self) -> Option<Box<ASTNode>> {
+        self.assign_primary_node();
+        let mut root = self.parse_tree_root.take()?;
     
-    // }
+        while self.current.0 < self.token_list.len() {
+
+            // i have no idea how you fucking cannot borrow self as mutable in a fucking while-let 
+            // imagine cloning just for the sake 
+            // pls help
+            let token = self.token_list[self.current.0].clone(); 
+            if token.get_token_type() == TokenType::TSlash {
+                break;
+            }
+    
+            self.inc_current(); // this assumes there NOT be any syntax error in the token list 
+            //  
+            self.assign_primary_node();
+            let right = self.parse_tree_root.take()?;
+    
+            root = ASTNode::new(
+                get_ast_by_token_type(token.get_token_type()),
+                Some(root),
+                Some(right),
+                Some(token.get_token_value()),
+            );
+        }
+        Some(root)
+    }
+    
     // maybe just maybe use stack instead of fucking recursion cuz fuck rust anyways
     // 2 + 3 * 5 + 7 -> [2, +, (3, *, 5) transform subtree] etc 
     // transform right heavy subtree -> something good tree idk lol 
@@ -56,11 +75,10 @@ impl Parser {
 impl Parser {
 
     fn inc_current(&mut self) {
-        let next = self
-            .token_list
-            .get(self.current.0 + 1)
-            .expect("Could not get the next token");
-        self.current = (self.current.0 + 1, next.clone());
-        return;
+        if self.current.0 + 1 >= self.token_list.len() {
+            return; 
+        }
+        self.current.0 += 1;
+        self.current.1 = self.token_list[self.current.0].clone();
     }
 }
