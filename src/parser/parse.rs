@@ -32,7 +32,7 @@ impl Parser {
         let mut value_stack: Vec<Box<ASTNode>> = Vec::new();
         let mut operator_stack: Vec<Token> = Vec::new();
         
-        self.assign_primary_node();
+        self.scan_integer_type();
         value_stack.push(self.parse_tree_root.take()?);
 
         while let Some(token) = self.token_list.get(self.current.0).cloned() {
@@ -40,9 +40,17 @@ impl Parser {
                 break;
             }
 
-            self.inc_current();
-            self.assign_primary_node();
 
+            /* 
+            to make this stuff presedence
+            -> our grammer might have 2 presedences -> 1 - mult, 2 - add 
+            if a mult token if found, we will need to put other add 
+            if add is found, we need to put other as mult*/
+
+            self.inc_current(); // for operators, as the first one is scanned yet
+            self.scan_integer_type();
+
+            // thius assumes the next must be an integer
             let right_value: Box<ASTNode> = self.parse_tree_root.take()?;
 
             let left_value: Box<ASTNode> = value_stack.pop().unwrap(); // the previous value
@@ -57,7 +65,7 @@ impl Parser {
     // 2 + 3 * 5 + 7 -> [2, +, (3, *, 5) transform subtree] etc 
     // transform right heavy subtree -> something good tree idk lol 
 
-    fn assign_primary_node(&mut self) {
+    fn scan_integer_type(&mut self) {
         if let Some(token) = self.token_list.get(self.current.0) {
             if token.get_token_type() == TokenType::TIntlit {
                 let node: Box<ASTNode> = ASTNode::new_leaf(ASTNodeType::AIntLit, token.get_token_value());
