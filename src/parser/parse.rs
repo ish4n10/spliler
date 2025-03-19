@@ -29,33 +29,29 @@ impl Parser {
 
 impl Parser {
     pub fn generate_ast(&mut self) -> Option<Box<ASTNode>> {
+        let mut value_stack: Vec<Box<ASTNode>> = Vec::new();
+        let mut operator_stack: Vec<Token> = Vec::new();
+        
         self.assign_primary_node();
-        let mut root = self.parse_tree_root.take()?;
-    
-        while self.current.0 < self.token_list.len() {
+        value_stack.push(self.parse_tree_root.take()?);
 
-            // i have no idea how you fucking cannot borrow self as mutable in a fucking while-let 
-            // imagine cloning just for the sake 
-            // pls help
-            let token = self.token_list[self.current.0].clone(); 
-            if token.get_token_type() == TokenType::TSlash {
+        while let Some(token) = self.token_list.get(self.current.0).cloned() {
+            if token.get_token_type() == TokenType::TSemiColon  {
                 break;
             }
-    
-            self.inc_current(); // this assumes there NOT be any syntax error in the token list 
-            //  
+
+            self.inc_current();
             self.assign_primary_node();
-            let right = self.parse_tree_root.take()?;
-    
-            root = ASTNode::new(
-                get_ast_by_token_type(token.get_token_type()),
-                Some(root),
-                Some(right),
-                Some(token.get_token_value()),
-            );
+
+            let right_value: Box<ASTNode> = self.parse_tree_root.take()?;
+
+            let left_value: Box<ASTNode> = value_stack.pop().unwrap(); // the previous value
+            let new_node: Box<ASTNode> = ASTNode::new(get_ast_by_token_type(token.get_token_type()), Some(left_value), Some(right_value), Some(token.get_token_value()));
+            value_stack.push(new_node);
         }
-        Some(root)
-    }
+        value_stack.pop()
+}
+    
     
     // maybe just maybe use stack instead of fucking recursion cuz fuck rust anyways
     // 2 + 3 * 5 + 7 -> [2, +, (3, *, 5) transform subtree] etc 
@@ -64,7 +60,7 @@ impl Parser {
     fn assign_primary_node(&mut self) {
         if let Some(token) = self.token_list.get(self.current.0) {
             if token.get_token_type() == TokenType::TIntlit {
-                let node = ASTNode::new_leaf(ASTNodeType::AIntLit, token.get_token_value());
+                let node: Box<ASTNode> = ASTNode::new_leaf(ASTNodeType::AIntLit, token.get_token_value());
                 self.parse_tree_root = Some(node);
                 self.inc_current();
             }
