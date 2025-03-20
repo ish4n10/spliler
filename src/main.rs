@@ -20,10 +20,8 @@ fn main() {
 
     lexer.print_tokens();
     let mut parser = Parser::new(lexer.get_tokens().to_vec());
-    let something = parser.generate_ast();
-    
-    println!("The node is\n{}", something.unwrap());
-    
+    let something = parser.additive_expr();
+    println!("The data is \n{}", something.unwrap());
     println!("The file data is\n{}", file_data);
     return;
 }

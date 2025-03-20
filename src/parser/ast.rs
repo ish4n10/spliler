@@ -7,7 +7,9 @@ pub enum ASTNodeType {
     ASub,
     AMult,
     ADivide,
-    AIntLit
+    AIntLit,
+    ALeftBracket,
+    ARightBracket
 }
 
 #[derive(Clone, Debug)]

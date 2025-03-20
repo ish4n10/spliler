@@ -29,6 +29,8 @@ pub fn get_ast_by_token_type(token: TokenType) -> ASTNodeType {
         TokenType::TStar => ASTNodeType::AMult,
         TokenType::TSlash => ASTNodeType::ADivide,
         TokenType::TIntlit => ASTNodeType::AIntLit,
+        TokenType::TLeftBracket => ASTNodeType::ALeftBracket,
+        TokenType::TRightBracket => ASTNodeType::ARightBracket,
         _ => panic!("The token could not be found while matching ast instruction!")
 
     }

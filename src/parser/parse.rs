@@ -1,4 +1,3 @@
-
 use crate::helpers::get_ast_by_token_type;
 use crate::lexer::token::Token;
 use crate::lexer::token::TokenType;
@@ -28,55 +27,70 @@ impl Parser {
 }
 
 impl Parser {
-    pub fn generate_ast(&mut self) -> Option<Box<ASTNode>> {
-        let mut value_stack: Vec<Box<ASTNode>> = Vec::new();
-        let mut operator_stack: Vec<Token> = Vec::new();
+    // Handles * and /
+    fn multiplicative_expr(&mut self) -> Option<Box<ASTNode>> {
         
-        self.scan_integer_type();
-        value_stack.push(self.parse_tree_root.take()?);
 
+        let mut left: Box<ASTNode> = self.integer_expr()?;
+
+       
         while let Some(token) = self.token_list.get(self.current.0).cloned() {
-            if token.get_token_type() == TokenType::TSemiColon  {
-                break;
+            match token.get_token_type() {
+                TokenType::TStar | TokenType::TSlash => {
+                    let op_type: ASTNodeType = get_ast_by_token_type(token.get_token_type());
+
+                    self.inc_current(); 
+                    let right: Box<ASTNode> = self.integer_expr()?; 
+
+                    left = ASTNode::new(
+                        op_type,
+                        Some(left),
+                        Some(right),
+                        Some(token.get_token_value()),
+                    );
+                }
+                _ => break,
             }
-
-
-            /* 
-            to make this stuff presedence
-            -> our grammer might have 2 presedences -> 1 - mult, 2 - add 
-            if a mult token if found, we will need to put other add 
-            if add is found, we need to put other as mult*/
-
-            self.inc_current(); // for operators, as the first one is scanned yet
-            self.scan_integer_type();
-
-            // thius assumes the next must be an integer
-            let right_value: Box<ASTNode> = self.parse_tree_root.take()?;
-
-            let left_value: Box<ASTNode> = value_stack.pop().unwrap(); // the previous value
-            let new_node: Box<ASTNode> = ASTNode::new(get_ast_by_token_type(token.get_token_type()), Some(left_value), Some(right_value), Some(token.get_token_value()));
-            value_stack.push(new_node);
         }
-        value_stack.pop()
-}
-    
-    
-    // maybe just maybe use stack instead of fucking recursion cuz fuck rust anyways
-    // 2 + 3 * 5 + 7 -> [2, +, (3, *, 5) transform subtree] etc 
-    // transform right heavy subtree -> something good tree idk lol 
+        Some(left)
+    }
 
-    fn scan_integer_type(&mut self) {
+    // Handles + and -
+    pub fn additive_expr(&mut self) -> Option<Box<ASTNode>> {
+
+        let mut left: Box<ASTNode> = self.multiplicative_expr()?;
+
+        while let Some(token) = self.token_list.get(self.current.0).cloned(){
+            match token.get_token_type() {
+                TokenType::TAdd | TokenType::TSub => {
+                    let op_type: ASTNodeType = get_ast_by_token_type(token.get_token_type());
+
+                    self.inc_current(); 
+                    let right: Box<ASTNode> = self.multiplicative_expr()?; 
+
+                    left = ASTNode::new(
+                        op_type,
+                        Some(left),
+                        Some(right),
+                        Some(token.get_token_value()),
+                    );
+                }
+                _ => break,
+            }
+        }
+        Some(left)
+    }
+
+    fn integer_expr(&mut self) -> Option<Box<ASTNode>> {
         if let Some(token) = self.token_list.get(self.current.0) {
             if token.get_token_type() == TokenType::TIntlit {
                 let node: Box<ASTNode> = ASTNode::new_leaf(ASTNodeType::AIntLit, token.get_token_value());
-                self.parse_tree_root = Some(node);
                 self.inc_current();
+                return Some(node);
             }
         }
+        None
     }
-}
-
-impl Parser {
 
     fn inc_current(&mut self) {
         if self.current.0 + 1 >= self.token_list.len() {
@@ -84,5 +98,11 @@ impl Parser {
         }
         self.current.0 += 1;
         self.current.1 = self.token_list[self.current.0].clone();
+    }
+}
+
+impl Parser {
+    pub fn pretty_print(&self) {
+        println!("The tree\n {}", self.parse_tree_root.as_ref().unwrap());
     }
 }

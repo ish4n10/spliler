@@ -157,6 +157,14 @@ impl Lexer {
                 let cur_token = Token::new(TokenType::TSlash, None);
                 self.add_token(cur_token);
             },
+            "(" => {
+                let cur_token = Token::new(TokenType::TLeftBracket, None);
+                self.add_token(cur_token);
+            },
+            ")" => {
+                let cur_token = Token::new(TokenType::TRightBracket, None);
+                self.add_token(cur_token);
+            }
             _ => {}
         }
         return;

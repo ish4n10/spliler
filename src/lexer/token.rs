@@ -7,7 +7,9 @@ pub enum TokenType {
     TStar,
     TSlash,
     TIntlit,
-    TSemiColon
+    TSemiColon,
+    TLeftBracket,
+    TRightBracket,
 }
 
 #[derive(Copy, Clone, Debug)]
