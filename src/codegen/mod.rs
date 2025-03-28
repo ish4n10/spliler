@@ -1,2 +1,2 @@
-mod generate_code;
-mod cpu;
+pub mod generate_code;
+pub mod cpu;

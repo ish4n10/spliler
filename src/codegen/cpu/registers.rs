@@ -1,3 +1,5 @@
+#[derive(Copy, Clone, Debug)]
+
 pub enum RegisterList {
     r8,
     r9,
@@ -6,7 +8,7 @@ pub enum RegisterList {
 }
 
 impl RegisterList {
-    fn to_str(&self) -> &'static str {
+    pub fn to_str(&self) -> &'static str {
         match self {
             RegisterList::r10 => "r10",
             RegisterList::r11 => "r11",
@@ -16,13 +18,18 @@ impl RegisterList {
     }
 }
 
-struct RegisterImpl {
-    reg: RegisterList,
-    in_use: bool, // free or in use
-    value: Option<i64>,
+
+#[derive(Copy, Clone, Debug)]
+
+pub struct RegisterImpl {
+    pub reg: RegisterList,
+    pub in_use: bool, // free or in use
+    pub value: Option<i64>,
 }
 
-struct Registers {
+#[derive(Copy, Clone, Debug)]
+
+pub struct Registers {
     registers: [RegisterImpl; 4],
 }
 
@@ -61,6 +68,15 @@ impl Registers {
         }
     }
 
+    pub fn free_register(&mut self, reg: &mut RegisterImpl) {
+        for register in &mut self.registers {
+          if register.reg.to_str() == reg.reg.to_str() {
+            register.in_use = false;
+            register.value = None;
+          }
+        }
+    }
+    
     pub fn alloc_register(&mut self, value: i64) -> Option<&RegisterImpl> {
         
         for register in &mut self.registers {

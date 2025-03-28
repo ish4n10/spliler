@@ -6,7 +6,7 @@ mod codegen;
 use helpers::read_input_file;
 use parser::parse::Parser;
 use std::env;
-
+use codegen::cpu::instructions;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -24,5 +24,6 @@ fn main() {
     let something = parser.additive_expr();
     println!("The data is \n{}", something.unwrap());
     println!("The file data is\n{}", file_data);
+    
     return;
 }
