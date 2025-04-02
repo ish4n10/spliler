@@ -1,6 +1,6 @@
 #[derive(Copy, Clone, Debug)]
-
 pub enum RegisterList {
+    invalid,
     r8,
     r9,
     r10,
@@ -10,6 +10,7 @@ pub enum RegisterList {
 impl RegisterList {
     pub fn to_str(&self) -> &'static str {
         match self {
+            RegisterList::invalid => "invalid",
             RegisterList::r10 => "r10",
             RegisterList::r11 => "r11",
             RegisterList::r8 => "r8",
@@ -20,15 +21,19 @@ impl RegisterList {
 
 
 #[derive(Copy, Clone, Debug)]
-
 pub struct RegisterImpl {
     pub reg: RegisterList,
     pub in_use: bool, // free or in use
-    pub value: Option<i64>,
+}
+
+
+impl RegisterImpl {
+    pub fn create_empty() -> Self {
+        RegisterImpl { reg: RegisterList::invalid, in_use: true }
+    }
 }
 
 #[derive(Copy, Clone, Debug)]
-
 pub struct Registers {
     registers: [RegisterImpl; 4],
 }
@@ -40,22 +45,18 @@ impl Registers {
                 RegisterImpl {
                     reg: RegisterList::r8,
                     in_use: false,
-                    value: None,
                 },
                 RegisterImpl {
                     reg: RegisterList::r9,
                     in_use: false,
-                    value: None,
                 },
                 RegisterImpl {
                     reg: RegisterList::r10,
                     in_use: false,
-                    value: None,
                 },
                 RegisterImpl {
                     reg: RegisterList::r11,
                     in_use: false,
-                    value: None,
                 },
             ],
         }
@@ -64,7 +65,6 @@ impl Registers {
     pub fn free_all(&mut self) {
         for register in &mut self.registers {
             register.in_use = false;
-            register.value = None;
         }
     }
 
@@ -72,7 +72,6 @@ impl Registers {
         for register in &mut self.registers {
           if register.reg.to_str() == reg.reg.to_str() {
             register.in_use = false;
-            register.value = None;
           }
         }
     }
@@ -82,7 +81,6 @@ impl Registers {
         for register in &mut self.registers {
             if register.in_use == false {
                 register.in_use = true;
-                register.value = Some(value);
                 return Some(register);
             }
         }
